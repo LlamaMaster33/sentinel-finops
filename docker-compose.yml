@@ -1,0 +1,9 @@
+version: "3.8"
+services:
+  sentinel:
+    build: .
+    env_file: .env
+    volumes:
+      - ./:/app
+    ports: []
+    restart: unless-stopped
