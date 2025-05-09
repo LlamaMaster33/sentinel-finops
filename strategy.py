@@ -1,19 +1,16 @@
-import backtrader as bt
-from config import SMA_FAST, SMA_SLOW
+import pandas as pd
+import talib
 
-class SmaCross(bt.Strategy):
-    params = dict(fast=SMA_FAST, slow=SMA_SLOW)
+def compute_signals(df, sma_window, ema_window):
+    df['SMA'] = df['Close'].rolling(window=sma_window).mean()
+    df['EMA'] = df['Close'].ewm(span=ema_window).mean()
+    df['RSI'] = talib.RSI(df['Close'])
 
-    def __init__(self):
-        # Initialize two SMAs and crossover detector
-        self.fast_sma = bt.ind.SMA(period=self.p.fast)
-        self.slow_sma = bt.ind.SMA(period=self.p.slow)
-        self.cross = bt.ind.CrossOver(self.fast_sma, self.slow_sma)
-
-    def next(self):
-        # Buy when fast crosses above slow
-        if not self.position and self.cross > 0:
-            self.buy()
-        # Sell when fast crosses below slow
-        elif self.position and self.cross < 0:
-            self.sell()
+    latest = df.iloc[-1]
+    signals = {
+        "price": latest["Close"],
+        "SMA": latest["SMA"],
+        "EMA": latest["EMA"],
+        "RSI": latest["RSI"]
+    }
+    return signals
