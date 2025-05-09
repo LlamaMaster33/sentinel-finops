@@ -1,23 +1,24 @@
-from newsapi import NewsApiClient
 import feedparser
-from config import NEWSAPI_KEY, NEWS_SOURCES, RSS_FEEDS
+import requests
+from newspaper import Article
+from config import RSS_FEEDS, NEWSAPI_KEY
 
-# 1) NewsAPI v2
-newsapi = NewsApiClient(api_key=NEWSAPI_KEY)
-
-def fetch_news_api(query: str, page_size=20):
-    resp = newsapi.get_everything(
-        q=query, sources=",".join(NEWS_SOURCES),
-        page_size=page_size
-    )
-    return [article["title"] + ": " + article["description"]
-            for article in resp.get("articles", [])]
-
-# 2) RSS fallback
-def fetch_rss():
-    entries = []
+def fetch_rss_news():
+    headlines = []
     for url in RSS_FEEDS:
         feed = feedparser.parse(url)
-        for e in feed.entries[:20]:
-            entries.append(e.title + ": " + getattr(e, "summary", ""))
-    return entries
+        for entry in feed.entries:
+            headlines.append(entry.title)
+    return headlines
+
+def fetch_newsapi_headlines(query="stock"):
+    url = f"https://newsapi.org/v2/everything?q={query}&apiKey={NEWSAPI_KEY}"
+    res = requests.get(url)
+    articles = res.json().get("articles", [])
+    return [a["title"] for a in articles]
+
+def fetch_article_text(url):
+    article = Article(url)
+    article.download()
+    article.parse()
+    return article.text
