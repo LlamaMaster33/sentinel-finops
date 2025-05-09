@@ -1,10 +1,9 @@
-yfinance                   # live stock quotes :contentReference[oaicite:1]{index=1}
-backtrader                 # backtesting & live strategy :contentReference[oaicite:2]{index=2}
-newsapi-python             # NewsAPI client :contentReference[oaicite:3]{index=3}
-newspaper3k                # web scraping news :contentReference[oaicite:4]{index=4}
-feedparser                 # RSS feed parsing :contentReference[oaicite:5]{index=5}
-textblob                   # sentiment analysis :contentReference[oaicite:6]{index=6}
-ollama                     # Dolphin 3 via Ollama :contentReference[oaicite:7]{index=7}
-python-telegram-bot        # Telegram alerts :contentReference[oaicite:8]{index=8}
-python-dotenv              # load env vars
-schedule                   # lightweight scheduler
+yfinance
+schedule
+textblob
+newspaper3k
+feedparser
+requests
+python-dotenv
+pandas
+talib
