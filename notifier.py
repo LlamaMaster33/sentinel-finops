@@ -1,10 +1,7 @@
-from telegram import Bot
+import requests
 from config import TELEGRAM_TOKEN, TELEGRAM_CHAT_ID
 
-bot = Bot(TELEGRAM_TOKEN)
-
-def send_alert(msg: str):
-    """
-    Push a message to your Telegram smartphone.
-    """
-    bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=msg)
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    data = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
+    requests.post(url, data=data)
