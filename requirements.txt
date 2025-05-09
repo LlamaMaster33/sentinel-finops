@@ -2,8 +2,9 @@ yfinance
 schedule
 textblob
 newspaper3k
+lxml[html_clean]
 feedparser
 requests
 python-dotenv
 pandas
-talib
+ta
