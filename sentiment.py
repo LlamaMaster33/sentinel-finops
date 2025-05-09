@@ -1,8 +1,5 @@
 from textblob import TextBlob
 
-def analyze_sentiment(text: str):
-    """
-    Returns polarity [-1..1] and subjectivity [0..1].
-    """
+def analyze_sentiment(text):
     blob = TextBlob(text)
-    return blob.sentiment.polarity, blob.sentiment.subjectivity
+    return blob.sentiment.polarity
