@@ -8,7 +8,27 @@ from sentiment import analyze_sentiment
 from strategy import compute_signals
 from ai_analyzer import build_prompt, query_dolphin
 from notifier import send_telegram_message
+from history import load_recent_logs, write_log
 from threading import Thread
+import os
+import sys
+
+LOCKFILE = "/tmp/sentinel.lock"
+
+if os.path.exists(LOCKFILE):
+    print("❌ Sentinel is already running.")
+    sys.exit(0)
+
+with open(LOCKFILE, "w") as f:
+    f.write("locked")
+
+def parse_ai_output(result_text):
+    """Naive parser - you can improve this with regex or LLM self-reflection"""
+    lines = result_text.strip().splitlines()
+    decision = next((l for l in lines if any(k in l.upper() for k in ["BUY", "SELL", "HOLD"])), "UNKNOWN")
+    confidence = next((l for l in lines if "%" in l), "0%")
+    reasoning = result_text.strip()
+    return decision, confidence, reasoning
 
 def analyze_ticker(ticker):
     try:
@@ -29,11 +49,15 @@ def analyze_ticker(ticker):
         )
         print(f"💬 Sentiment score: {sentiment_score}")
 
-        prompt = build_prompt(ticker, signals["price"], signals, headlines, sentiment_score)
+        history_logs = load_recent_logs(ticker)
+        prompt = build_prompt(ticker, signals["price"], signals, headlines, sentiment_score, history_logs)
         print(f"🧠 Prompt ready. Prompting Dolphin3...")
 
         result = query_dolphin(prompt)
-        print("📤 AI Response:", result[:300])  # preview
+        print("📤 AI Response:\n", result[:400])
+
+        decision, confidence, reasoning = parse_ai_output(result)
+        write_log(ticker, signals, sentiment_score, decision, confidence, reasoning)
 
         message = f"[{ticker}] Recommendation:\n{result.strip()}"
         print("📲 Sending Telegram...")
@@ -41,7 +65,6 @@ def analyze_ticker(ticker):
         print("✅ Message sent.")
     except Exception as e:
         print(f"[ERROR] Analysis failed for {ticker}: {e}")
-
 
 def run_analysis():
     for ticker in TICKERS:
@@ -74,3 +97,6 @@ if __name__ == "__main__":
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+import atexit
+atexit.register(lambda: os.remove(LOCKFILE) if os.path.exists(LOCKFILE) else None)

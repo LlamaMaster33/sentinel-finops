@@ -1,9 +1,18 @@
 import subprocess
 
-def build_prompt(ticker, price, indicators, headlines, sentiment_score):
+def build_prompt(ticker, price, indicators, headlines, sentiment_score, history_logs):
+    history_section = "\n".join([
+        f"- {log['timestamp'][:10]}: {log['decision']}, RSI={log['RSI']}, Sentiment={log['sentiment']}"
+        for log in history_logs
+    ]) or "- No past decisions"
+
     return f"""
 Stock: {ticker}
-Price: {price}
+
+Historical decisions:
+{history_section}
+
+Current Price: {price}
 SMA: {indicators['SMA']}
 EMA: {indicators['EMA']}
 RSI: {indicators['RSI']}
@@ -13,6 +22,7 @@ Headlines: {headlines}
 
 Give a trade recommendation (buy/sell/hold), confidence %, and reasoning.
 """
+
 
 def query_dolphin(prompt):
     try:

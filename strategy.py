@@ -4,7 +4,6 @@ def compute_signals(df, sma_window, ema_window):
     if df.empty or len(df) < max(sma_window, ema_window, 14):
         return {"price": 0, "SMA": 0, "EMA": 0, "RSI": 0}
 
-    # Extract clean Series
     close = df['Close']
     if hasattr(close, "values") and close.values.ndim > 1:
         close = close.squeeze()
@@ -15,8 +14,8 @@ def compute_signals(df, sma_window, ema_window):
 
     latest = df.iloc[-1]
     return {
-        "price": latest["Close"],
-        "SMA": latest["SMA"],
-        "EMA": latest["EMA"],
-        "RSI": latest["RSI"]
+        "price": latest.get("Close", 0),
+        "SMA": latest.get("SMA", 0),
+        "EMA": latest.get("EMA", 0),
+        "RSI": latest.get("RSI", 0)
     }
